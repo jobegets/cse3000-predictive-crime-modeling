@@ -5,7 +5,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
 import cProfile
-import pstats
 
 # ==========================
 # 1. Load and Preprocess Data
@@ -118,8 +117,3 @@ if __name__ == '__main__':
     profiler.enable()
     
     data, rf_model = main(file_path)
-    
-    profiler.disable()
-    stats = pstats.Stats(profiler)
-    stats.sort_stats('cumtime')
-    stats.print_stats(10)
