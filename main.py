@@ -90,16 +90,19 @@ def evaluate_model(model, X_test, y_test, label_desc):
 # 4. Map Functions
 # ==========================
 def map_crime_occurrence(data):
-    """Map predicted crime occurrence."""
+    """Map predicted crime occurrence alongside actual and predicted values."""
     crime_map = folium.Map(location=[40.7128, -74.0060], zoom_start=12)
     cluster = MarkerCluster().add_to(crime_map)
 
     for _, row in data.iterrows():
         lat, lon = row['Latitude'], row['Longitude']
-        crime_pred = row['Predicted_Crime_Occurred']
+        actual_crime = row['Crime_Occurred']  # Actual value (real crime or no crime)
+        crime_pred = row['Predicted_Crime_Occurred']  # Predicted value (crime or no crime)
 
-        color = 'red' if crime_pred == 1 else 'green'
-        popup_text = 'Crime Occurred' if crime_pred == 1 else 'No Crime'
+        # Determine marker color (green if prediction is correct, red if incorrect)
+        color = 'green' if actual_crime == crime_pred else 'red'
+        popup_text = f"Predicted: {'Crime Occurred' if crime_pred == 1 else 'No Crime'}<br>"
+        popup_text += f"Actual: {'Crime Occurred' if actual_crime == 1 else 'No Crime'}"
 
         folium.Marker(
             location=[lat, lon],
@@ -109,26 +112,32 @@ def map_crime_occurrence(data):
     
     folium.LayerControl().add_to(crime_map)
     crime_map.save("crime_occurrence_map.html")
-    print("Crime occurrence map saved as 'crime_occurrence_map.html'.")
+    print("Crime occurrence map with predictions and actuals saved as 'crime_occurrence_map_updated.html'.")
+
 
 def map_crime_types(data):
-    """Map predicted crime types."""
+    """Map predicted crime types alongside actual and predicted values."""
     crime_type_map = folium.Map(location=[40.7128, -74.0060], zoom_start=12)
     cluster = MarkerCluster().add_to(crime_type_map)
 
     for _, row in data.iterrows():
         lat, lon = row['Latitude'], row['Longitude']
-        crime_type = row['Predicted_OFNS_DESC']
+        actual_crime_type = row['OFNS_DESC']  # Actual crime type
+        predicted_crime_type = row['Predicted_OFNS_DESC']  # Predicted crime type
+
+        popup_text = f"Predicted Crime Type: {predicted_crime_type}<br>"
+        popup_text += f"Actual Crime Type: {actual_crime_type}"
 
         folium.Marker(
             location=[lat, lon],
-            popup=f"Predicted Crime Type: {crime_type}",
+            popup=popup_text,
             icon=folium.Icon(color='blue', icon='info-sign')
         ).add_to(cluster)
 
     folium.LayerControl().add_to(crime_type_map)
     crime_type_map.save("crime_type_map.html")
-    print("Crime type map saved as 'crime_type_map.html'.")
+    print("Crime type map with predictions and actuals saved as 'crime_type_map_updated.html'.")
+
 
 # ==========================
 # 5. Backtesting
