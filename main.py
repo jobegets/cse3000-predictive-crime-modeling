@@ -147,21 +147,30 @@ def backtest_model(data, features, model, label):
     months = sorted(data['Month'].unique())
     accuracies = []
 
-    print("\n===== BACKTESTING BY MONTH =====")
-    for month in months:
-        month_data = data[data['Month'] == month]
-        if len(month_data) < 10:
+    for i in range(len(months) - 1):
+        # Train on all data up to the current month
+        train_data = data[data['Month'] <= months[i]]
+        test_data = data[data['Month'] == months[i+1]]
+        
+        if len(test_data) < 10:
             continue  # Skip months with very few samples
-
-        X_month = month_data[features]
-        y_month = month_data[label]
-
-        y_pred = model.predict(X_month)
-        acc = accuracy_score(y_month, y_pred)
-        accuracies.append((month, acc))
-        print(f"Month {month}: Accuracy = {acc:.4f}")
-
+        
+        X_train = train_data[features]
+        y_train = train_data[label]
+        
+        X_test = test_data[features]
+        y_test = test_data[label]
+        
+        # Train a new model on current training data
+        model.fit(X_train, y_train)
+        
+        y_pred = model.predict(X_test)
+        acc = accuracy_score(y_test, y_pred)
+        accuracies.append((months[i+1], acc))
+        print(f"Predicting Month {months[i+1]}: Accuracy = {acc:.4f}")
+        
     return accuracies
+
 
 # ==========================
 # 6. Bias Testing
@@ -227,7 +236,9 @@ def main(file_path):
     map_crime_types(data)
 
     # Run backtesting
+    print('========BACKTESTING CRIME OCCURRENE========\n')
     backtest_model(binary_data, binary_features, binary_model, 'Crime_Occurred')
+    print('========BACKTESTING CRIME TYPE========\n')
     backtest_model(data, binary_features, multiclass_model, 'OFNS_DESC')
 
     # Run simple income bias test
