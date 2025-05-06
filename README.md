@@ -34,4 +34,5 @@ python3 crime_prediction.py
 
 ### Notes
 
-The model's predictions are based on neutral features like location and time.
+- The model's predictions are based on neutral features like location and time.
+- Our report was concluded with the first 10000 rows of the NYC Complaint Data
